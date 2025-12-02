@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一周：环境与界面初探 - A3000 12G专版</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            margin: -30px -30px 30px;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .gpu-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 25px;
+            border-radius: 15px;
+            background: var(--light);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2::before {
+            content: "▶";
+            font-size: 1.2rem;
+        }
+        
+        .section h3 {
+            color: var(--secondary);
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .card h4 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        tr:hover {
+            background: #f1f5f9;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .code-comment {
+            color: #94a3b8;
+            font-style: italic;
+        }
+        
+        .checklist {
+            list-style: none;
+        }
+        
+        .checklist li {
+            padding: 10px 0 10px 35px;
+            position: relative;
+        }
+        
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            top: 10px;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .checklist li.done::before {
+            content: "✓";
+            color: var(--success);
+        }
+        
+        .checklist li.warning::before {
+            content: "⚠";
+            color: var(--warning);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .status-ready { background: #d1fae5; color: #065f46; }
+        .status-warning { background: #fef3c7; color: #92400e; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+        .status-info { background: #dbeafe; color: #1e40af; }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .tips {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #f59e0b;
+        }
+        
+        .tips h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tips h4::before {
+            content: "💡";
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px 0;
+                margin: -15px -15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .timestamp {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>第一周：环境与界面初探</h1>
+            <div class="subtitle">ComfyUI 三个月精通计划 · 第1周学习指南</div>
+            <div class="gpu-badge">专属配置：NVIDIA A3000 12GB 专业显卡</div>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 25%"></div>
+        </div>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <span class="status-badge status-ready">准备开始</span>
+            <span class="status-badge status-info">预计耗时：1-2小时</span>
+            <span class="status-badge status-info">难度：初级</span>
+        </div>
+        
+        <!-- A3000配置说明 -->
+        <div class="section">
+            <h2>A3000 12G 配置说明</h2>
+            
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🎯 显存优势</h4>
+                    <p>12GB足够运行SDXL模型（8-10GB显存占用），批量生成小图也没问题</p>
+                </div>
+                <div class="card">
+                    <h4>⚡ 性能定位</h4>
+                    <p>介于消费级RTX 4070和RTX 4080之间，适合学习和商用</p>
+                </div>
+                <div class="card">
+                    <h4>⚙️ 关键设置</h4>
+                    <ul class="checklist">
+                        <li>默认生成分辨率：<strong>768x768</strong> 或 <strong>1024x1024</strong>（SDXL）</li>
+                        <li>批处理：可同时生成2-4张512x512图片</li>
+                        <li>使用 <strong>xformers</strong> 加速（整合包已包含）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 手把手练习 -->
+        <div class="section">
+            <h2>手把手练习 - A3000专版</h2>
+            
+            <h3>第一步：针对性安装</h3>
+            <div class="checklist">
+                <li class="done">下载整合包：搜索"秋葉 ComfyUI整合包"最新版</li>
+                <li class="done">一定要选择带有"NVIDIA"或"显卡"字样的版本</li>
+                <li class="done">推荐选择标注"支持SDXL"的版本</li>
+                <li class="done">文件放置：不要放在C盘，建议路径 <code>D:\AI_Tools\ComfyUI_windows_portable_NVIDIA\</code></li>
+            </div>
+            
+            <h3>第二步：关键配置</h3>
+            <p>首次运行前配置路径文件，避免C盘爆满：</p>
+            
+            <div class="code-block">
+                <span class="code-comment"># 编辑 extra_model_paths.yaml 文件</span><br>
+                a111:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;base_path: D:/AI_Tools/ComfyUI_windows_portable_NVIDIA/<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;checkpoints: models/checkpoints/<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;vae: models/VAE/<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;loras: models/Lora/<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;upscale_models: models/upscale_models/<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;embeddings: models/embeddings/<br>
+            </div>
+            
+            <h3>第三步：首次运行测试</h3>
+            <div class="checklist">
+                <li>运行 <code>run_nvidia_gpu.bat</code></li>
+                <li>A3000驱动较新，应该不会遇到CUDA版本问题</li>
+                <li>首次启动会较慢（建立索引）</li>
+                <li>启动后，打开浏览器输入：<code>http://127.0.0.1:8188</code></li>
+                <li>在界面右下角查看状态栏，应显示GPU型号</li>
+            </div>
+            
+            <h3>第四步：准备测试模型</h3>
+            <p>为A3000 12G推荐的首个模型：</p>
+            
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🤖 新手友好型</h4>
+                    <p><strong>dreamshaper_8.safetensors</strong> (SD1.5, 2GB)</p>
+                    <ul>
+                        <li>风格全面，出图稳定</li>
+                        <li>下载地址：Civitai搜索"dreamshaper 8"</li>
+                        <li>放入：<code>models/checkpoints/</code></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>👤 真实人像型</h4>
+                    <p><strong>RealisticVisionV51_v51VAE.safetensors</strong> (SD1.5, 2GB)</p>
+                    <ul>
+                        <li>真实人像优秀</li>
+                        <li>放入同一文件夹</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>第五步：运行基础工作流</h3>
+            <div class="checklist">
+                <li>1. 启动ComfyUI</li>
+                <li>2. 右键画布 → <code>Load</code> → <code>Default workflows</code> → <code>Basic Stable Diffusion</code></li>
+                <li>3. 点击 <code>Checkpoint Loader</code> 节点，选择 <code>dreamshaper_8.safetensors</code></li>
+                <li>4. 如果列表为空，重启ComfyUI</li>
+            </div>
+            
+            <h4>A3000优化设置（在 KSampler 节点中）：</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>推荐值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>steps</code></td>
+                            <td><strong>20</strong></td>
+                            <td>初始值，可后续调整</td>
+                        </tr>
+                        <tr>
+                            <td><code>cfg</code></td>
+                            <td><strong>7</strong></td>
+                            <td>提示词遵循程度</td>
+                        </tr>
+                        <tr>
+                            <td><code>width/height</code></td>
+                            <td><strong>512</strong></td>
+                            <td>初始测试分辨率</td>
+                        </tr>
+                        <tr>
+                            <td><code>sampler_name</code></td>
+                            <td><strong>euler_ancestral</strong></td>
+                            <td>速度快，质量好</td>
+                        </tr>
+                        <tr>
+                            <td><code>scheduler</code></td>
+                            <td><strong>normal</strong></td>
+                            <td>标准调度器</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>首次生成步骤：</h4>
+            <div class="checklist">
+                <li>在 <code>CLIP Text Encode (Prompt)</code> 输入：<br>
+                    <code>masterpiece, best quality, 1girl, white hair, blue eyes, detailed eyes, in a garden</code>
+                </li>
+                <li>在 <code>CLIP Text Encode (Negative)</code> 输入：<br>
+                    <code>worst quality, low quality, blurry, deformed, ugly</code>
+                </li>
+                <li>点击 <code>Queue Prompt</code> 按钮生成</li>
+            </div>
+        </div>
+        
+        <!-- A3000专属练习任务 -->
+        <div class="section">
+            <h2>A3000专属练习任务</h2>
+            
+            <h3>任务1：性能基准测试</h3>
+            <p>按顺序完成以下生成并记录结果：</p>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>任务</th>
+                            <th>设置</th>
+                            <th>预期显存占用</th>
+                            <th>你的实际耗时</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>512x512, steps=20</td>
+                            <td>4-5GB</td>
+                            <td><input type="text" placeholder="填写耗时" style="width: 100px; padding: 5px;"></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>768x768, steps=20</td>
+                            <td>7-8GB</td>
+                            <td><input type="text" placeholder="填写耗时" style="width: 100px; padding: 5px;"></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>512x512, steps=30</td>
+                            <td>4-5GB</td>
+                            <td><input type="text" placeholder="填写耗时" style="width: 100px; padding: 5px;"></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><strong>批处理：</strong>Batch size=2, 512x512</td>
+                            <td>6-7GB</td>
+                            <td><input type="text" placeholder="填写耗时" style="width: 100px; padding: 5px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="tips">
+                <h4>批处理设置方法：</h4>
+                <ol>
+                    <li>在 <code>KSampler</code> 中找到 <code>batch_size</code></li>
+                    <li>改为 <code>2</code></li>
+                    <li>生成，会一次出两张图</li>
+                </ol>
+            </div>
+            
+            <h3>任务2：显存监控</h3>
+            <div class="checklist">
+                <li>打开任务管理器（Ctrl+Shift+Esc）</li>
+                <li>切换到"性能"标签</li>
+                <li>选择GPU 0（你的A3000）</li>
+                <li>观察生成时的指标：</li>
+            </div>
+            
+            <div class="card-grid">
+                <div class="card">
+                    <h4>📈 GPU利用率</h4>
+                    <p>应该接近100%</p>
+                </div>
+                <div class="card">
+                    <h4>💾 专用GPU内存</h4>
+                    <p>生成时的使用量</p>
+                </div>
+                <div class="card">
+                    <h4>🌡️ 温度监控</h4>
+                    <p>A3000散热好，应低于80°C</p>
+                </div>
+            </div>
+            
+            <h3>任务3：错误触发与解决</h3>
+            <p>故意制造一个显存错误，学习如何恢复：</p>
+            <div class="checklist">
+                <li>1. 将 <code>width</code> 和 <code>height</code> 都改为 <code>1536</code></li>
+                <li>2. 尝试生成</li>
+                <li>3. 观察错误信息（应该会提示OOM - Out of Memory）</li>
+                <li class="warning">4. 解决方法：</li>
+                <li>&nbsp;&nbsp;&nbsp;- 点击"Queue Prompt"旁边的 <strong>中断</strong> 按钮</li>
+                <li>&nbsp;&nbsp;&nbsp;- 将分辨率改回 <code>768x768</code></li>
+                <li>&nbsp;&nbsp;&nbsp;- 重新生成</li>
+            </div>
+        </div>
+        
+        <!-- 成果检验 -->
+        <div class="section">
+            <h2>成果检验 - A3000版</h2>
+            
+            <h3>1. 安装验证</h3>
+            <div class="checklist">
+                <li><input type="checkbox"> ComfyUI成功启动，浏览器正常打开</li>
+                <li><input type="checkbox"> 在 <code>Checkpoint Loader</code> 中能看到 <code>dreamshaper_8</code> 模型</li>
+                <li><input type="checkbox"> 首次生成成功得到图片</li>
+            </div>
+            
+            <h3>2. 性能记录</h3>
+            <div class="checklist">
+                <li>任务1（512x512）耗时：<input type="text" placeholder="填写时间" style="width: 80px; padding: 5px; margin: 0 10px;"> 秒</li>
+                <li>任务4（批处理2张）耗时：<input type="text" placeholder="填写时间" style="width: 80px; padding: 5px; margin: 0 10px;"> 秒</li>
+                <li><strong>计算加速比：</strong>单张时间 vs 均张时间 = <input type="text" placeholder="计算结果" style="width: 100px; padding: 5px; margin: 0 10px;"></li>
+            </div>
+            
+            <h3>3. 错误处理</h3>
+            <div class="checklist">
+                <li>触发OOM错误后，你如何恢复？<br>
+                    <textarea placeholder="描述你的解决步骤..." style="width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #d1d5db;" rows="3"></textarea>
+                </li>
+                <li>A3000在生成时的最高温度是 <input type="text" placeholder="填写温度" style="width: 60px; padding: 5px; margin: 0 10px;"> °C</li>
+            </div>
+            
+            <h3>4. 质量测试</h3>
+            <p>生成一张主题为 <code>cyberpunk city, neon lights, rain, cinematic lighting</code> 的图片</p>
+            <p>描述生成质量：</p>
+            <textarea placeholder="细节、氛围是否符合预期？有哪些优点和不足？" style="width: 100%; padding: 15px; margin-top: 10px; border-radius: 8px; border: 1px solid #d1d5db;" rows="4"></textarea>
+        </div>
+        
+        <!-- A3000优化提示 -->
+        <div class="section">
+            <h2>A3000优化提示</h2>
+            
+            <h3>长期运行建议</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>💨 散热管理</h4>
+                    <p>保持良好通风，A3000是单风扇设计</p>
+                </div>
+                <div class="card">
+                    <h4>🖥️ 多任务处理</h4>
+                    <p>可考虑使用 <code>--lowvram</code> 模式（如需同时运行其他3D软件）</p>
+                </div>
+                <div class="card">
+                    <h4>🧹 存储清理</h4>
+                    <p>定期清理 <code>output</code> 文件夹</p>
+                </div>
+            </div>
+            
+            <h3>后续学习预配置</h3>
+            <div class="checklist">
+                <li>下载一个VAE模型：<code>vae-ft-mse-840000-ema-pruned.safetensors</code></li>
+                <li>放入 <code>models/VAE/</code> 文件夹</li>
+                <li>将在后续课程中使用</li>
+            </div>
+            
+            <h3>驱动检查</h3>
+            <div class="checklist">
+                <li class="warning">确保NVIDIA Studio驱动为最新版</li>
+                <li>专业卡驱动更新较慢，但更稳定</li>
+            </div>
+        </div>
+        
+        <!-- 下一步行动 -->
+        <div class="section">
+            <h2>🚀 下一步行动</h2>
+            <p>完成本课后，你将进入：</p>
+            <div style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); padding: 25px; border-radius: 12px; margin: 20px 0;">
+                <h3 style="color: #0369a1; margin-bottom: 15px;">课程2：提示词工程基础</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>✅ 学习构造有效提示词</li>
+                    <li>✅ 理解权重语法 <code>(word:1.3)</code></li>
+                    <li>✅ 掌握模型融合技巧</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="button" onclick="markComplete()">✅ 标记本课完成</button>
+                <button class="button" onclick="saveProgress()">💾 保存进度到本地</button>
+                <button class="button" onclick="printPage()">🖨️ 打印学习记录</button>
+            </div>
+        </div>
+        
+        <div class="timestamp">
+            最后更新：<span id="currentDate"></span> | 学习进度：<span id="progressPercent">25%</span>
+        </div>
+    </div>
+
+    <script>
+        // 设置当前日期
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long'
+        });
+        
+        // 标记完成功能
+        function markComplete() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            
+            document.querySelector('.progress-fill').style.width = '100%';
+            document.getElementById('progressPercent').textContent = '100%';
+            
+            alert('🎉 恭喜完成第一课！请保存进度并继续下一课。');
+        }
+        
+        // 保存进度功能
+        function saveProgress() {
+            const inputs = document.querySelectorAll('input, textarea');
+            const data = {};
+            
+            inputs.forEach(input => {
+                if (input.type !== 'button' && input.type !== 'submit') {
+                    data[input.placeholder || input.name || 'input'] = input.value;
+                }
+            });
+            
+            // 创建下载
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `comfyui-week1-progress-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📁 学习进度已保存为JSON文件！');
+        }
+        
+        // 打印功能
+        function printPage() {
+            window.print();
+        }
+        
+        // 自动保存检查表状态
+        document.addEventListener('DOMContentLoaded', function() {
+            // 恢复保存的数据
+            const saved = localStorage.getItem('comfyuiWeek1Progress');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    Object.keys(data).forEach(key => {
+                        const input = document.querySelector(`[placeholder="${key}"]`);
+                        if (input) input.value = data[key];
+                    });
+                } catch(e) {
+                    console.log('无保存的进度');
+                }
+            }
+            
+            // 自动保存
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const data = {};
+                    inputs.forEach(inp => {
+                        if (inp.type !== 'button' && inp.type !== 'submit') {
+                            data[inp.placeholder || inp.name || 'input'] = inp.value;
+                        }
+                    });
+                    localStorage.setItem('comfyuiWeek1Progress', JSON.stringify(data));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
