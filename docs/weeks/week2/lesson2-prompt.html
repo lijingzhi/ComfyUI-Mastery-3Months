@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二课：提示词工程基础 - A3000 12G专版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3a86ff;
+            --primary-dark: #2667cc;
+            --secondary: #8338ec;
+            --accent: #ff006e;
+            --success: #06d6a0;
+            --warning: #ffd166;
+            --danger: #ef476f;
+            --dark: #1a1a2e;
+            --darker: #0d0d1a;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --code-bg: #1e1e2e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 课程头部 */
+        .lesson-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 25px;
+            padding: 50px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .lesson-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff, var(--warning));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .lesson-subtitle {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+        
+        .lesson-meta {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 导航 */
+        .lesson-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .nav-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: rgba(58, 134, 255, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .nav-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        /* 内容区域 */
+        .content-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-subtitle {
+            font-size: 1.4rem;
+            color: var(--warning);
+            margin: 25px 0 15px;
+        }
+        
+        /* 代码和示例 */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .code-comment {
+            color: #6a9955;
+        }
+        
+        .code-string {
+            color: #ce9178;
+        }
+        
+        .code-keyword {
+            color: #569cd6;
+        }
+        
+        .code-operator {
+            color: #d4d4d4;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .example-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .example-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-5px);
+        }
+        
+        .example-title {
+            color: var(--success);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 提示词比较表 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .comparison-table tr:hover td {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        /* 练习区域 */
+        .exercise-area {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .exercise-title {
+            color: var(--warning);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .exercise-instruction {
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--gray-light);
+            font-weight: 500;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(58, 134, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* 进度追踪 */
+        .progress-tracker {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            width: 300px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        @media (min-width: 1400px) {
+            .progress-tracker {
+                display: block;
+            }
+        }
+        
+        .tracker-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary);
+        }
+        
+        .tracker-list {
+            list-style: none;
+        }
+        
+        .tracker-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tracker-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tracker-item.active {
+            background: rgba(58, 134, 255, 0.2);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .tracker-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .tracker-check.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        /* 提示词可视化 */
+        .prompt-visualizer {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .prompt-tokens {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .token {
+            padding: 8px 15px;
+            background: rgba(58, 134, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(58, 134, 255, 0.3);
+        }
+        
+        .token.emphasis-1 {
+            background: rgba(6, 214, 160, 0.2);
+            border-color: rgba(6, 214, 160, 0.3);
+        }
+        
+        .token.emphasis-2 {
+            background: rgba(255, 209, 102, 0.2);
+            border-color: rgba(255, 209, 102, 0.3);
+        }
+        
+        /* 页脚 */
+        .lesson-footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .lesson-header {
+                padding: 30px 20px;
+            }
+            
+            .lesson-title {
+                font-size: 2.5rem;
+            }
+            
+            .content-section {
+                padding: 25px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* 特效 */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 课程头部 -->
+        <header class="lesson-header">
+            <div class="particles" id="particles"></div>
+            <div class="header-content">
+                <h1 class="lesson-title">第二课：提示词工程基础</h1>
+                <p class="lesson-subtitle">
+                    掌握AI绘画的语言艺术，学习如何通过精准的提示词控制生成结果，
+                    发挥A3000 12GB显卡的最大潜力
+                </p>
+                
+                <div class="lesson-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>预计时间：1.5-2小时</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>4个模块 · 6个练习</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>A3000 12GB优化提示词策略</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>难度：初级 → 中级</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 导航 -->
+        <nav class="lesson-nav">
+            <div class="nav-grid">
+                <div class="nav-item active" data-section="theory">
+                    <div class="nav-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>提示词基础理论</h3>
+                    <p>理解提示词的结构、权重语法和CLIP编码原理</p>
+                </div>
+                <div class="nav-item" data-section="practice">
+                    <div class="nav-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>ComfyUI实践</h3>
+                    <p>在ComfyUI中应用提示词技巧，多提示词组合</p>
+                </div>
+                <div class="nav-item" data-section="a3000-optimization">
+                    <div class="nav-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>A3000优化策略</h3>
+                    <p>针对12GB显存的提示词优化技巧</p>
+                </div>
+                <div class="nav-item" data-section="exercises">
+                    <div class="nav-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3>实战练习</h3>
+                    <p>通过练习巩固所学，生成高质量作品</p>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- 进度追踪（桌面端显示） -->
+        <aside class="progress-tracker">
+            <h3 class="tracker-title">学习进度追踪</h3>
+            <ul class="tracker-list">
+                <li class="tracker-item active" data-section="theory">
+                    <div class="tracker-check checked"><i class="fas fa-check"></i></div>
+                    <div>
+                        <div>提示词基础理论</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">已学习</div>
+                    </div>
+                </li>
+                <li class="tracker-item" data-section="practice">
+                    <div class="tracker-check"></div>
+                    <div>
+                        <div>ComfyUI实践</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">待学习</div>
+                    </div>
+                </li>
+                <li class="tracker-item" data-section="a3000-optimization">
+                    <div class="tracker-check"></div>
+                    <div>
+                        <div>A3000优化策略</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">待学习</div>
+                    </div>
+                </li>
+                <li class="tracker-item" data-section="exercises">
+                    <div class="tracker-check"></div>
+                    <div>
+                        <div>实战练习</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">待完成</div>
+                    </div>
+                </li>
+            </ul>
+            
+            <div style="margin-top: 25px; text-align: center;">
+                <div style="font-size: 0.9rem; color: var(--gray); margin-bottom: 10px;">总体进度</div>
+                <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="overallProgressBar" style="width: 25%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 4px;"></div>
+                </div>
+                <div style="font-size: 0.9rem; margin-top: 10px;" id="progressText">25% 完成</div>
+            </div>
+        </aside>
+        
+        <!-- 内容区域 -->
+        <main>
+            <!-- 第一部分：提示词基础理论 -->
+            <section id="theory" class="content-section active">
+                <h2 class="section-title">
+                    <i class="fas fa-book"></i> 第一部分：提示词基础理论
+                </h2>
+                
+                <p style="margin-bottom: 25px; font-size: 1.1rem; line-height: 1.8;">
+                    提示词是AI绘画的"语言"，掌握这门语言的艺术，就能精确控制生成结果。本节将深入解析提示词的核心原理。
+                </p>
+                
+                <h3 class="section-subtitle">1.1 提示词的基本结构</h3>
+                <div class="example-grid">
+                    <div class="example-card">
+                        <div class="example-title">
+                            <i class="fas fa-check-circle"></i> 正向提示词
+                        </div>
+                        <p>描述你<b>想要</b>生成的内容，包括：</p>
+                        <ul style="margin: 15px 0 15px 20px;">
+                            <li>主体（Subject）</li>
+                            <li>风格（Style）</li>
+                            <li>细节（Details）</li>
+                            <li>氛围（Atmosphere）</li>
+                            <li>画质（Quality）</li>
+                        </ul>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">
+                            <i class="fas fa-times-circle"></i> 负面提示词
+                        </div>
+                        <p>描述你<b>不想要</b>的内容，用于：</p>
+                        <ul style="margin: 15px 0 15px 20px;">
+                            <li>排除不良画质</li>
+                            <li>避免特定元素</li>
+                            <li>纠正AI常见错误</li>
+                            <li>优化构图</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3 class="section-subtitle">1.2 权重语法详解</h3>
+                
+                <div class="code-block">
+<span class="code-comment"># 基础权重语法</span><br>
+<span class="code-string">(word:1.5)</span> <span class="code-comment"># 将"word"的权重增加50%</span><br>
+<span class="code-string">(word:0.5)</span> <span class="code-comment"># 将"word"的权重减少50%</span><br>
+<span class="code-string">(word)</span> <span class="code-comment"># 等同于 (word:1.05)，轻微强调</span><br>
+<span class="code-string">[word]</span> <span class="code-comment"># 等同于 (word:1.1)</span><br>
+<br>
+<span class="code-comment"># 嵌套权重</span><br>
+<span class="code-string">((beautiful sunset:1.3):1.2)</span> <span class="code-comment"># 多重权重控制</span><br>
+<br>
+<span class="code-comment"># 注意：权重值通常在0.5-2.0之间，超过2.0可能导致奇怪结果</span>
+                </div>
+                
+                <div class="prompt-visualizer">
+                    <div style="margin-bottom: 15px; color: var(--primary); font-weight: 600;">
+                        <i class="fas fa-eye"></i> 提示词可视化示例
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                        masterpiece, best quality, (1girl:1.3), (red hair:1.2), detailed eyes, in a (magical forest:1.4), cinematic lighting
+                    </div>
+                    <div class="prompt-tokens" id="promptTokens">
+                        <!-- JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <h3 class="section-subtitle">1.3 CLIP Text Encode原理</h3>
+                <p style="margin-bottom: 15px;">
+                    CLIP模型将文本转换为AI能理解的"向量"。理解这一点有助于编写更有效的提示词：
+                </p>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>CLIP版本</th>
+                            <th>最大Tokens</th>
+                            <th>特点</th>
+                            <th>A3000优化建议</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CLIP-L (ViT-L/14)</td>
+                            <td>77 tokens</td>
+                            <td>理解能力强，细节丰富</td>
+                            <td>适合复杂提示词，显存占用稍高</td>
+                        </tr>
+                        <tr>
+                            <td>CLIP-G (ViT-G/14)</td>
+                            <td>77 tokens</td>
+                            <td>更强的语义理解</td>
+                            <td>12GB显存足够，但生成稍慢</td>
+                        </tr>
+                        <tr>
+                            <td>OpenCLIP</td>
+                            <td>77 tokens</td>
+                            <td>开源版本，可自定义</td>
+                            <td>灵活，适合实验性项目</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="exercise-area">
+                    <div class="exercise-title">
+                        <i class="fas fa-pen-alt"></i> 理论练习：分析提示词
+                    </div>
+                    <div class="exercise-instruction">
+                        分析以下提示词，识别其中的元素并理解权重语法的应用：
+                    </div>
+                    
+                    <div class="code-block" style="margin-bottom: 20px;">
+<span class="code-comment"># 示例提示词</span><br>
+<span class="code-string">masterpiece, best quality, ((ancient chinese palace:1.4)), intricate details, golden hour, (volumetric lighting:1.3), highly detailed, 8k, cinematic, by Greg Rutkowski and Artgerm, trending on artstation</span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">你的分析：</label>
+                        <textarea id="theoryAnalysis" placeholder="请写下你的分析..."></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="checkTheoryAnalysis()">
+                        <i class="fas fa-check"></i> 提交分析
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn" onclick="navigateToSection('practice')">
+                        下一部分：ComfyUI实践 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- 第二部分：ComfyUI实践 -->
+            <section id="practice" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-code"></i> 第二部分：ComfyUI实践
+                </h2>
+                
+                <p style="margin-bottom: 25px; font-size: 1.1rem; line-height: 1.8;">
+                    在ComfyUI中应用提示词技巧，学习多提示词组合和高级节点使用方法。
+                </p>
+                
+                <h3 class="section-subtitle">2.1 CLIP Text Encode节点深度解析</h3>
+                
+                <div class="code-block">
+<span class="code-comment"># ComfyUI工作流中的提示词节点配置</span><br>
+<span class="code-keyword">CLIP Text Encode (Prompt)</span>: {<br>
+&nbsp;&nbsp;<span class="code-string">"text"</span>: <span class="code-string">"masterpiece, best quality, 1girl, detailed eyes"</span>,<br>
+&nbsp;&nbsp;<span class="code-string">"clip"</span>: <span class="code-operator">连接至</span> Checkpoint Loader 的 CLIP 输出<br>
+}<br>
+<br>
+<span class="code-keyword">CLIP Text Encode (Negative)</span>: {<br>
+&nbsp;&nbsp;<span class="code-string">"text"</span>: <span class="code-string">"worst quality, low quality, blurry, deformed"</span>,<br>
+&nbsp;&nbsp;<span class="code-string">"clip"</span>: <span class="code-operator">同上</span><br>
+}
+                </div>
+                
+                <h3 class="section-subtitle">2.2 多提示词组合技巧</h3>
+                
+                <div class="example-grid">
+                    <div class="example-card">
+                        <div class="example-title">
+                            <i class="fas fa-layer-group"></i> 方法1：权重混合
+                        </div>
+                        <p>通过调整不同提示词的权重来混合风格：</p>
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                            (style A:1.0) AND (style B:0.7)
+                        </div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">
+                            <i class="fas fa-random"></i> 方法2：随机选择
+                        </div>
+                        <p>使用Wildcard节点随机选择提示词：</p>
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                            __artist__, __background__, __style__
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="section-subtitle">2.3 模型与提示词的相互作用</h3>
+                
+                <div class="exercise-area">
+                    <div class="exercise-title">
+                        <i class="fas fa-flask"></i> 实践练习：模型对比实验
+                    </div>
+                    <div class="exercise-instruction">
+                        使用相同的提示词，在不同模型上测试效果：
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">测试提示词：</label>
+                        <textarea id="testPrompt" placeholder="输入你的测试提示词...">masterpiece, best quality, cyberpunk city, neon lights, rain, cinematic lighting</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">负面提示词：</label>
+                        <textarea id="testNegative" placeholder="输入负面提示词...">worst quality, low quality, blurry, deformed, ugly</textarea>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 10px;">选择测试模型：</label>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="model" value="dreamshaper_8" checked>
+                                <span>dreamshaper_8</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="model" value="realisticVisionV51">
+                                <span>RealisticVision V5.1</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="model" value="sd_xl">
+                                <span>SDXL 1.0</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">实验结果记录：</label>
+                        <textarea id="experimentResult" placeholder="记录不同模型下的生成效果差异..."></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="runExperiment()">
+                        <i class="fas fa-play"></i> 开始实验
+                    </button>
+                    <button class="btn btn-secondary" onclick="saveExperiment()" style="margin-left: 15px;">
+                        <i class="fas fa-save"></i> 保存结果
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn btn-secondary" onclick="navigateToSection('theory')">
+                        <i class="fas fa-arrow-left"></i> 上一部分
+                    </button>
+                    <button class="btn" onclick="navigateToSection('a3000-optimization')" style="margin-left: 15px;">
+                        下一部分：A3000优化策略 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- 第三部分：A3000优化策略 -->
+            <section id="a3000-optimization" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tachometer-alt"></i> 第三部分：A3000优化策略
+                </h2>
+                
+                <p style="margin-bottom: 25px; font-size: 1.1rem; line-height: 1.8;">
+                    针对NVIDIA A3000 12GB显卡的特性，优化提示词以获得最佳性能和效果。
+                </p>
+                
+                <h3 class="section-subtitle">3.1 高效提示词设计原则</h3>
+                
+                <div class="example-grid">
+                    <div class="example-card">
+                        <div class="example-title">
+                            <i class="fas fa-bolt"></i> 原则1：精简高效
+                        </div>
+                        <p>避免过长提示词，控制在50-75个tokens以内。</p>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,0,110,0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                            <strong>优化前：</strong> 100+ tokens，生成速度慢<br>
+                            <strong>优化后：</strong> 50-75 tokens，速度提升30%
+                        </div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">
+                            <i class="fas fa-memory"></i> 原则2：显存友好
+                        </div>
+                        <p>减少复杂权重嵌套，降低CLIP计算负担。</p>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(6,214,160,0.1); border-radius: 8px; border-left: 3px solid var(--success);">
+                            <strong>A3000优势：</strong> 12GB显存可处理中等复杂度提示词<br>
+                            <strong>建议：</strong> 权重嵌套不超过3层
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="section-subtitle">3.2 批处理提示词优化</h3>
+                
+                <div class="code-block">
+<span class="code-comment"># A3000 12GB批处理优化策略</span><br>
+<span class="code-comment"># 单次批处理最大数量（512x512分辨率）</span><br>
+<span class="code-string">batch_size = 4</span> <span class="code-comment"># 可同时生成4张不同图片</span><br>
+<br>
+<span class="code-comment"># 批处理提示词示例</span><br>
+<span class="code-string">prompt_batch = [</span><br>
+&nbsp;&nbsp;<span class="code-string">"masterpiece, 1girl, red hair, in forest"</span>,<br>
+&nbsp;&nbsp;<span class="code-string">"masterpiece, 1girl, blue hair, in city"</span>,<br>
+&nbsp;&nbsp;<span class="code-string">"masterpiece, 1boy, knight, in castle"</span>,<br>
+&nbsp;&nbsp;<span class="code-string">"masterpiece, landscape, mountains, sunset"</span><br>
+<span class="code-string">]</span><br>
+<br>
+<span class="code-comment"># 使用相同的负面提示词以减少计算</span><br>
+<span class="code-string">negative_prompt = "worst quality, low quality, blurry"</span>
+                </div>
+                
+                <h3 class="section-subtitle">3.3 A3000专属提示词模板</h3>
+                
+                <div class="exercise-area">
+                    <div class="exercise-title">
+                        <i class="fas fa-cogs"></i> A3000优化练习
+                    </div>
+                    <div class="exercise-instruction">
+                        优化以下提示词，使其更适合A3000 12GB显卡：
+                    </div>
+                    
+                    <div class="code-block" style="margin-bottom: 20px;">
+<span class="code-comment"># 原始提示词（需要优化）</span><br>
+<span class="code-string">absolutely incredible stunning masterpiece, ultra detailed, hyper realistic, photorealistic, 1girl, (((beautiful face))), (((detailed eyes))), (((perfect skin))), (((flowing hair))), wearing an (((elegant dress))), standing in a (((magical forest))), with (((sunbeams))) shining through the trees, (((volumetric light))), (((atmospheric perspective))), (((depth of field))), shot on professional camera, 8k resolution, trending on artstation, by greg rutkowski and alphonse mucha and artgerm and wlop</span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">优化后的提示词：</label>
+                        <textarea id="optimizedPrompt" placeholder="输入你的优化版本..."></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">优化说明：</label>
+                        <textarea id="optimizationNotes" placeholder="解释你做了哪些优化以及原因..."></textarea>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="color: var(--warning); margin-bottom: 10px;">
+                            <i class="fas fa-lightbulb"></i> 优化目标：
+                        </div>
+                        <ul style="margin-left: 20px;">
+                            <li>减少token数量（目标：≤75）</li>
+                            <li>简化权重嵌套（目标：≤3层）</li>
+                            <li>保持核心语义不变</li>
+                            <li>提高生成效率</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="btn" onclick="checkOptimization()">
+                        <i class="fas fa-check"></i> 检查优化
+                    </button>
+                    <button class="btn btn-secondary" onclick="showOptimizationExample()" style="margin-left: 15px;">
+                        <i class="fas fa-eye"></i> 查看示例优化
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn btn-secondary" onclick="navigateToSection('practice')">
+                        <i class="fas fa-arrow-left"></i> 上一部分
+                    </button>
+                    <button class="btn" onclick="navigateToSection('exercises')" style="margin-left: 15px;">
+                        下一部分：实战练习 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- 第四部分：实战练习 -->
+            <section id="exercises" class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-dumbbell"></i> 第四部分：实战练习
+                </h2>
+                
+                <p style="margin-bottom: 25px; font-size: 1.1rem; line-height: 1.8;">
+                    通过实际练习巩固所学知识，生成高质量作品，并建立个人提示词库。
+                </p>
+                
+                <h3 class="section-subtitle">4.1 练习1：风格控制</h3>
+                
+                <div class="exercise-area">
+                    <div class="exercise-title">
+                        <i class="fas fa-palette"></i> 风格控制练习
+                    </div>
+                    <div class="exercise-instruction">
+                        使用相同的主题，生成不同风格的图片：
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">主题：</label>
+                        <input type="text" id="exerciseTheme" value="A mysterious castle" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 1rem;">
+                    </div>
+                    
+                    <div style="margin: 25px 0;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">风格1：写实照片</label>
+                                <textarea id="style1" placeholder="写实风格提示词..." rows="3">photorealistic, professional photography, detailed, realistic lighting</textarea>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">风格2：动漫插画</label>
+                                <textarea id="style2" placeholder="动漫风格提示词..." rows="3">anime style, vibrant colors, cel shading, by Makoto Shinkai</textarea>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">风格3：油画艺术</label>
+                                <textarea id="style3" placeholder="油画风格提示词..." rows="3">oil painting, brush strokes, classical art, by Van Gogh</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">负面提示词（通用）：</label>
+                        <textarea id="exerciseNegative" placeholder="输入负面提示词..." rows="2">worst quality, low quality, blurry, deformed, ugly</textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="generateStyleExercise()">
+                        <i class="fas fa-magic"></i> 生成练习方案
+                    </button>
+                </div>
+                
+                <h3 class="section-subtitle">4.2 练习2：细节增强挑战</h3>
+                
+                <div class="exercise-area">
+                    <div class="exercise-title">
+                        <i class="fas fa-search-plus"></i> 细节增强练习
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">基础提示词：</label>
+                        <textarea id="basePrompt" placeholder="输入基础提示词..." rows="2">a beautiful landscape</textarea>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="color: var(--success); margin-bottom: 15px;">
+                            <i class="fas fa-list-ol"></i> 逐步添加细节：
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px;">第1步：添加时间</label>
+                                <input type="text" id="detail1" placeholder="如：sunset, golden hour" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px;">第2步：添加天气</label>
+                                <input type="text" id="detail2" placeholder="如：misty, rain, fog" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px;">第3步：添加细节元素</label>
+                                <input type="text" id="detail3" placeholder="如：wildflowers, river, mountains" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">最终提示词预览：</label>
+                        <textarea id="finalPromptPreview" readonly rows="3" style="background: rgba(0,0,0,0.3);"></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="updatePromptPreview()">
+                        <i class="fas fa-sync-alt"></i> 更新预览
+                    </button>
+                </div>
+                
+                <h3 class="section-subtitle">4.3 建立个人提示词库</h3>
+                
+                <div class="exercise-area">
+                    <div class="exercise-title">
+                        <i class="fas fa-database"></i> 提示词库建设
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">提示词库名称：</label>
+                        <input type="text" id="libraryName" value="我的A3000优化提示词库" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 1rem;">
+                    </div>
+                    
+                    <div style="margin: 25px 0;">
+                        <div style="color: var(--primary); margin-bottom: 15px;">
+                            <i class="fas fa-tags"></i> 分类添加提示词：
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">画质前缀</label>
+                                <textarea id="qualityPrefix" placeholder="如：masterpiece, best quality..." rows="3">masterpiece, best quality, 8k, ultra detailed</textarea>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">风格模板</label>
+                                <textarea id="styleTemplate" placeholder="如：cinematic, photorealistic..." rows="3">cinematic, photorealistic, professional photography</textarea>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">负面提示词</label>
+                                <textarea id="negativeLibrary" placeholder="负面提示词库..." rows="3">worst quality, low quality, blurry, deformed, ugly, extra limbs, missing limbs</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">使用说明：</label>
+                        <textarea id="libraryInstructions" placeholder="记录如何使用这个提示词库..." rows="3"></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="savePromptLibrary()">
+                        <i class="fas fa-save"></i> 保存到本地提示词库
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportPromptLibrary()" style="margin-left: 15px;">
+                        <i class="fas fa-download"></i> 导出为JSON
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn btn-secondary" onclick="navigateToSection('a3000-optimization')">
+                        <i class="fas fa-arrow-left"></i> 上一部分
+                    </button>
+                    <button class="btn" onclick="completeLesson()" style="margin-left: 15px; background: linear-gradient(135deg, var(--success), #059669);">
+                        <i class="fas fa-graduation-cap"></i> 完成本课学习
+                    </button>
+                </div>
+            </section>
+        </main>
+        
+        <!-- 页脚 -->
+        <footer class="lesson-footer">
+            <div class="navigation-buttons">
+                <a href="../week1/index.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回第一周
+                </a>
+                <div>
+                    <span style="color: var(--gray); margin-right: 20px;">课程进度: <strong id="footerProgress">25%</strong></span>
+                    <button class="btn" onclick="saveProgress()">
+                        <i class="fas fa-save"></i> 保存进度
+                    </button>
+                </div>
+                <a href="#" class="btn btn-secondary" id="nextLessonBtn">
+                    下一课：可控性入门 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <p style="margin-top: 40px;">
+                ComfyUI三个月精通计划 · 第二课：提示词工程基础 · A3000 12GB专版
+            </p>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--gray);">
+                <i class="fas fa-history"></i> 最后保存: <span id="lastSaveTime">-</span>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // 初始化数据
+        let lessonProgress = {
+            theory: false,
+            practice: false,
+            optimization: false,
+            exercises: false,
+            completed: false
+        };
+        
+        let currentSection = 'theory';
+        let lastSave = new Date();
+        
+        // 初始化粒子效果
+        function initParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animationDuration = `${10 + Math.random() * 20}s`;
+                container.appendChild(particle);
+            }
+        }
+        
+        // 初始化提示词可视化
+        function initPromptVisualizer() {
+            const prompt = "masterpiece, best quality, (1girl:1.3), (red hair:1.2), detailed eyes, in a (magical forest:1.4), cinematic lighting";
+            const tokens = prompt.split(/, |\(|\)/).filter(t => t.trim());
+            const container = document.getElementById('promptTokens');
+            
+            if (!container) return;
+            
+            container.innerHTML = tokens.map(token => {
+                let emphasis = '';
+                if (token.includes(':1.3') || token.includes(':1.4')) {
+                    emphasis = 'emphasis-2';
+                } else if (token.includes('1girl') || token.includes('red hair')) {
+                    emphasis = 'emphasis-1';
+                }
+                
+                // 清理token
+                let cleanToken = token.replace(/:[\d\.]+/, '').trim();
+                if (cleanToken) {
+                    return `<span class="token ${emphasis}">${cleanToken}</span>`;
+                }
+                return '';
+            }).join('');
+        }
+        
+        // 导航到指定部分
+        function navigateToSection(sectionId) {
+            // 隐藏所有部分
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 显示目标部分
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // 更新导航项状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // 更新进度追踪器
+            document.querySelectorAll('.tracker-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // 标记当前部分为已学习
+            if (!lessonProgress[sectionId]) {
+                lessonProgress[sectionId] = true;
+                updateProgress();
+                saveProgress();
+            }
+            
+            currentSection = sectionId;
+            
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // 更新总体进度
+        function updateProgress() {
+            const sections = ['theory', 'practice', 'optimization', 'exercises'];
+            const completed = sections.filter(s => lessonProgress[s]).length;
+            const total = sections.length;
+            const progressPercent = Math.round((completed / total) * 100);
+            
+            // 更新进度条
+            const progressBar = document.getElementById('overallProgressBar');
+            if (progressBar) {
+                progressBar.style.width = `${progressPercent}%`;
+            }
+            
+            // 更新进度文本
+            const progressText = document.getElementById('progressText');
+            if (progressText) {
+                progressText.textContent = `${progressPercent}% 完成`;
+            }
+            
+            // 更新页脚进度
+            const footerProgress = document.getElementById('footerProgress');
+            if (footerProgress) {
+                footerProgress.textContent = `${progressPercent}%`;
+            }
+            
+            // 更新追踪器复选框
+            sections.forEach(section => {
+                const trackerItem = document.querySelector(`.tracker-item[data-section="${section}"] .tracker-check`);
+                if (trackerItem) {
+                    if (lessonProgress[section]) {
+                        trackerItem.classList.add('checked');
+                        trackerItem.innerHTML = '<i class="fas fa-check"></i>';
+                    } else {
+                        trackerItem.classList.remove('checked');
+                        trackerItem.innerHTML = '';
+                    }
+                }
+            });
+            
+            // 检查是否完成所有部分
+            if (completed === total && !lessonProgress.completed) {
+                lessonProgress.completed = true;
+                showCompletionMessage();
+            }
+        }
+        
+        // 显示完成消息
+        function showCompletionMessage() {
+            // 创建庆祝消息
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                color: white;
+                padding: 40px;
+                border-radius: 20px;
+                z-index: 1000;
+                text-align: center;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+                animation: fadeIn 0.5s ease;
+            `;
+            message.innerHTML = `
+                <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+                <h2 style="font-size: 2rem; margin-bottom: 15px;">恭喜完成第二课！</h2>
+                <p style="margin-bottom: 25px; line-height: 1.6;">
+                    你已经掌握了提示词工程的核心技能。现在可以生成更精准、更高质量的AI图像了。
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn" onclick="this.parentElement.parentElement.remove()" style="background: white; color: var(--primary);">
+                        继续学习
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportLessonCertificate()">
+                        <i class="fas fa-award"></i> 导出学习证书
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(message);
+            
+            // 添加背景遮罩
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.7);
+                backdrop-filter: blur(5px);
+                z-index: 999;
+            `;
+            document.body.appendChild(overlay);
+            
+            // 点击遮罩关闭
+            overlay.addEventListener('click', () => {
+                message.remove();
+                overlay.remove();
+            });
+        }
+        
+        // 检查理论分析
+        function checkTheoryAnalysis() {
+            const analysis = document.getElementById('theoryAnalysis').value.trim();
+            if (!analysis) {
+                alert('请先填写分析内容');
+                return;
+            }
+            
+            // 简单的关键词检查
+            const keywords = ['权重', '结构', '质量', '风格', '细节'];
+            const found = keywords.filter(keyword => analysis.includes(keyword)).length;
+            
+            if (found >= 2) {
+                alert('✓ 分析正确！你已理解提示词的基本结构。');
+                lessonProgress.theory = true;
+                updateProgress();
+                saveProgress();
+            } else {
+                alert('请更详细地分析提示词的结构和权重应用。');
+            }
+        }
+        
+        // 运行实验
+        function runExperiment() {
+            const prompt = document.getElementById('testPrompt').value;
+            const negative = document.getElementById('testNegative').value;
+            const model = document.querySelector('input[name="model"]:checked').value;
+            
+            if (!prompt || !negative) {
+                alert('请填写提示词和负面提示词');
+                return;
+            }
+            
+            // 模拟实验过程
+            const experimentResult = document.getElementById('experimentResult');
+            experimentResult.value = `实验时间: ${new Date().toLocaleTimeString()}\n`;
+            experimentResult.value += `测试模型: ${model}\n`;
+            experimentResult.value += `正向提示词: ${prompt}\n`;
+            experimentResult.value += `负面提示词: ${negative}\n\n`;
+            experimentResult.value += `预期结果:\n`;
+            
+            // 根据模型给出预期结果
+            const expectations = {
+                'dreamshaper_8': '预期生成风格化较强的图像，色彩鲜艳，适合动漫和插画风格。',
+                'realisticVisionV51': '预期生成高度写实的图像，适合人像和真实场景。',
+                'sd_xl': '预期生成质量更高、细节更丰富的图像，但需要更多显存和生成时间。'
+            };
+            
+            experimentResult.value += expectations[model] || '请实际测试并记录结果。';
+            
+            // 标记实践部分为完成
+            lessonProgress.practice = true;
+            updateProgress();
+            saveProgress();
+            
+            alert('实验方案已生成！请在实际的ComfyUI中运行这些提示词，并记录真实结果。');
+        }
+        
+        // 保存实验
+        function saveExperiment() {
+            const result = document.getElementById('experimentResult').value;
+            if (!result.trim()) {
+                alert('没有实验结果可保存');
+                return;
+            }
+            
+            localStorage.setItem('promptExperimentResult', result);
+            alert('实验结果已保存到本地存储！');
+        }
+        
+        // 检查优化
+        function checkOptimization() {
+            const optimized = document.getElementById('optimizedPrompt').value;
+            const notes = document.getElementById('optimizationNotes').value;
+            
+            if (!optimized || !notes) {
+                alert('请填写优化后的提示词和优化说明');
+                return;
+            }
+            
+            // 简单的检查逻辑
+            const tokenCount = optimized.split(/[,\s]+/).filter(t => t.trim()).length;
+            const weightDepth = (optimized.match(/\(/g) || []).length;
+            
+            let feedback = `优化检查结果：\n`;
+            feedback += `- Token数量: ${tokenCount} ${tokenCount <= 75 ? '✓' : '✗ (建议≤75)'}\n`;
+            feedback += `- 权重嵌套层数: ${weightDepth} ${weightDepth <= 3 ? '✓' : '✗ (建议≤3)'}\n`;
+            
+            if (tokenCount <= 75 && weightDepth <= 3) {
+                feedback += '\n✓ 优化符合A3000最佳实践！';
+                lessonProgress.optimization = true;
+                updateProgress();
+                saveProgress();
+            } else {
+                feedback += '\n⚠ 请进一步优化以符合A3000最佳实践。';
+            }
+            
+            alert(feedback);
+        }
+        
+        // 显示优化示例
+        function showOptimizationExample() {
+            const example = `masterpiece, best quality, 1girl, beautiful face, detailed eyes, perfect skin, flowing hair, elegant dress, magical forest, sunbeams, volumetric light, atmospheric perspective, depth of field, professional photography, 8k`;
+            
+            document.getElementById('optimizedPrompt').value = example;
+            document.getElementById('optimizationNotes').value = `优化说明：
+1. 移除了多余的形容词和重复描述
+2. 将Token数量从35+减少到18
+3. 移除了复杂的权重嵌套
+4. 保持了核心语义和关键细节
+5. 更符合A3000的高效生成要求`;
+        }
+        
+        // 生成风格练习
+        function generateStyleExercise() {
+            const theme = document.getElementById('exerciseTheme').value;
+            const negative = document.getElementById('exerciseNegative').value;
+            
+            if (!theme) {
+                alert('请输入主题');
+                return;
+            }
+            
+            // 生成三个风格的完整提示词
+            const style1 = document.getElementById('style1').value;
+            const style2 = document.getElementById('style2').value;
+            const style3 = document.getElementById('style3').value;
+            
+            const exercisePlan = `风格控制练习方案：
+            
+主题: ${theme}
+
+=== 写实照片风格 ===
+正向提示词: masterpiece, best quality, ${theme}, ${style1}
+负面提示词: ${negative}
+
+=== 动漫插画风格 ===
+正向提示词: masterpiece, best quality, ${theme}, ${style2}
+负面提示词: ${negative}
+
+=== 油画艺术风格 ===
+正向提示词: masterpiece, best quality, ${theme}, ${style3}
+负面提示词: ${negative}
+
+建议：在ComfyUI中分别生成这三种风格，比较差异。`;
+
+            alert(exercisePlan);
+            
+            // 标记练习部分为完成
+            lessonProgress.exercises = true;
+            updateProgress();
+            saveProgress();
+        }
+        
+        // 更新提示词预览
+        function updatePromptPreview() {
+            const base = document.getElementById('basePrompt').value;
+            const detail1 = document.getElementById('detail1').value;
+            const detail2 = document.getElementById('detail2').value;
+            const detail3 = document.getElementById('detail3').value;
+            
+            let final = base;
+            if (detail1) final += `, ${detail1}`;
+            if (detail2) final += `, ${detail2}`;
+            if (detail3) final += `, ${detail3}`;
+            
+            document.getElementById('finalPromptPreview').value = final;
+        }
+        
+        // 保存提示词库
+        function savePromptLibrary() {
+            const name = document.getElementById('libraryName').value;
+            const quality = document.getElementById('qualityPrefix').value;
+            const style = document.getElementById('styleTemplate').value;
+            const negative = document.getElementById('negativeLibrary').value;
+            const instructions = document.getElementById('libraryInstructions').value;
+            
+            const library = {
+                name: name,
+                qualityPrefix: quality,
+                styleTemplate: style,
+                negativePrompt: negative,
+                instructions: instructions,
+                created: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            localStorage.setItem('myPromptLibrary', JSON.stringify(library, null, 2));
+            alert(`提示词库 "${name}" 已保存到本地存储！`);
+        }
+        
+        // 导出提示词库
+        function exportPromptLibrary() {
+            const library = localStorage.getItem('myPromptLibrary');
+            if (!library) {
+                alert('没有找到提示词库，请先保存一个');
+                return;
+            }
+            
+            const blob = new Blob([library], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `prompt-library-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 完成本课
+        function completeLesson() {
+            if (confirm('确定要标记本课为完成吗？这将会更新你的学习进度。')) {
+                lessonProgress.theory = true;
+                lessonProgress.practice = true;
+                lessonProgress.optimization = true;
+                lessonProgress.exercises = true;
+                lessonProgress.completed = true;
+                
+                updateProgress();
+                saveProgress();
+                
+                alert('🎉 恭喜完成第二课学习！你已经掌握了提示词工程的核心技能。');
+            }
+        }
+        
+        // 保存进度
+        function saveProgress() {
+            const progressData = {
+                lesson2: lessonProgress,
+                lastSaved: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            localStorage.setItem('comfyuiLesson2Progress', JSON.stringify(progressData));
+            lastSave = new Date();
+            
+            // 更新最后保存时间
+            const lastSaveTime = document.getElementById('lastSaveTime');
+            if (lastSaveTime) {
+                lastSaveTime.textContent = lastSave.toLocaleTimeString();
+            }
+        }
+        
+        // 加载进度
+        function loadProgress() {
+            const saved = localStorage.getItem('comfyuiLesson2Progress');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.lesson2) {
+                        lessonProgress = data.lesson2;
+                    }
+                    if (data.lastSaved) {
+                        lastSave = new Date(data.lastSaved);
+                        const lastSaveTime = document.getElementById('lastSaveTime');
+                        if (lastSaveTime) {
+                            lastSaveTime.textContent = lastSave.toLocaleTimeString();
+                        }
+                    }
+                } catch (e) {
+                    console.log('加载进度失败，使用默认进度');
+                }
+            }
+            
+            updateProgress();
+        }
+        
+        // 导出学习证书
+        function exportLessonCertificate() {
+            const certificate = {
+                title: "ComfyUI学习证书",
+                lesson: "第二课：提示词工程基础",
+                student: "A3000 12GB用户",
+                completionDate: new Date().toISOString(),
+                skills: [
+                    "提示词结构与语法",
+                    "权重语法应用",
+                    "负面提示词设计",
+                    "A3000优化策略",
+                    "多风格控制"
+                ],
+                achievement: "成功掌握AI绘画的语言艺术"
+            };
+            
+            const blob = new Blob([JSON.stringify(certificate, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `comfyui-lesson2-certificate-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化特效
+            initParticles();
+            initPromptVisualizer();
+            
+            // 加载进度
+            loadProgress();
+            
+            // 设置导航点击事件
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    navigateToSection(this.dataset.section);
+                });
+            });
+            
+            // 设置追踪器点击事件
+            document.querySelectorAll('.tracker-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    navigateToSection(this.dataset.section);
+                });
+            });
+            
+            // 初始化细节预览
+            document.getElementById('detail1').addEventListener('input', updatePromptPreview);
+            document.getElementById('detail2').addEventListener('input', updatePromptPreview);
+            document.getElementById('detail3').addEventListener('input', updatePromptPreview);
+            
+            // 自动保存
+            setInterval(saveProgress, 30000); // 每30秒自动保存
+            
+            // 设置下一课按钮状态
+            const nextLessonBtn = document.getElementById('nextLessonBtn');
+            if (nextLessonBtn && !lessonProgress.completed) {
+                nextLessonBtn.style.opacity = '0.5';
+                nextLessonBtn.style.pointerEvents = 'none';
+                nextLessonBtn.title = '请先完成本课学习';
+            }
+        });
+    </script>
+</body>
+</html>
