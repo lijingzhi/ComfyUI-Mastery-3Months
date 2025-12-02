@@ -1,14 +1,14 @@
-# ComfyUI 三个月精通计划 - 商用短视频制作
+# ComfyUI 三个月从入门到放弃
 
 ![进度](https://img.shields.io/badge/进度-第1周-绿色) 
 ![显卡](https://img.shields.io/badge/显卡-NVIDIA_A3000_12G-blue)
-![目标](https://img.shields.io/badge/目标-商用短视频-orange)
+![目标](https://img.shields.io/badge/目标-死心-orange)
 
 ## 🎯 项目目标
-在三个月内系统掌握ComfyUI，最终能够独立制作符合商用标准的短视频内容。
+在三个月内系统掌握ComfyUI，最终能够彻底死心。
 
 **硬件配置**：NVIDIA A3000 12GB 专业显卡
-**时间框架**：2025年 [开始日期] 至 [结束日期]
+**时间框架**：2025年 12月02日 至 2026年02月28日
 **最终产出**：1-3分钟原创AI短视频
 
 ## 📚 学习路线
