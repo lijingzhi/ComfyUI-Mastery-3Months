@@ -4,153 +4,1176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学习进度仪表板 - ComfyUI精通计划</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/progress.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --success-dark: #3a86ff;
+            --warning: #f72585;
+            --warning-light: #ff9e00;
+            --info: #7209b7;
+            --dark: #1a1a2e;
+            --dark-light: #16213e;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --gray-dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* 头部导航 */
+        .dashboard-header {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px 40px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        
+        .header-title h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #fff, var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .header-title p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-light);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+        
+        /* 仪表板网格 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-card {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-full {
+            grid-column: span 12;
+        }
+        
+        .card-half {
+            grid-column: span 6;
+        }
+        
+        .card-third {
+            grid-column: span 4;
+        }
+        
+        .card-quarter {
+            grid-column: span 3;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card-title i {
+            color: var(--primary-light);
+            font-size: 1.3rem;
+        }
+        
+        /* 总体进度卡片 */
+        .overall-progress {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .progress-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+        
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 12;
+        }
+        
+        .progress-ring-fill {
+            fill: none;
+            stroke: url(#progressGradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 565;
+            stroke-dashoffset: 565;
+            transition: stroke-dashoffset 1.5s ease;
+        }
+        
+        .progress-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .progress-percent {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+        
+        .progress-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .progress-stats {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            min-width: 300px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .stat-trend {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+        
+        .trend-down {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--warning);
+        }
+        
+        /* 图表容器 */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        /* 每周进度图表 */
+        .weekly-progress {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .week-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .week-stat {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .week-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .week-progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .week-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        /* 学习时间分布 */
+        .time-distribution {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .time-chart-container {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+        
+        .time-legend {
+            flex: 1;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        
+        .legend-label {
+            flex: 1;
+            color: var(--gray);
+        }
+        
+        .legend-value {
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* 技能掌握情况 */
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .skill-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .skill-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .skill-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .skill-level {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+        
+        .skill-progress {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .skill-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .skill-tag {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary-light);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        /* 最近完成列表 */
+        .recent-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .recent-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .recent-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .recent-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .recent-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .recent-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+        
+        .recent-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-right: 20px;
+        }
+        
+        .recent-content {
+            flex: 1;
+        }
+        
+        .recent-title {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .recent-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .recent-time {
+            color: var(--primary-light);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        /* A3000性能数据 */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .perf-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .perf-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        .perf-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 20px;
+        }
+        
+        .perf-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .perf-label {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .perf-trend {
+            margin-top: 15px;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* 学习建议 */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        .suggestion-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        
+        .suggestion-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .suggestion-desc {
+            color: var(--gray);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        /* 里程碑 */
+        .milestone-track {
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .milestone-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        
+        .milestones {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .milestone {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+        
+        .milestone-dot {
+            width: 30px;
+            height: 30px;
+            background: var(--dark);
+            border: 4px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .milestone.active .milestone-dot {
+            background: var(--primary);
+            box-shadow: 0 0 0 8px rgba(67, 97, 238, 0.2);
+        }
+        
+        .milestone.completed .milestone-dot {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .milestone-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--gray);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .empty-desc {
+            color: var(--gray);
+            margin-bottom: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 页脚 */
+        .dashboard-footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .card-half {
+                grid-column: span 12;
+            }
+            
+            .card-third {
+                grid-column: span 6;
+            }
+            
+            .card-quarter {
+                grid-column: span 6;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .header-left {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .progress-ring {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-third, .card-quarter {
+                grid-column: span 12;
+            }
+            
+            .overall-progress {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .time-distribution {
+                flex-direction: column;
+            }
+        }
+        
+        /* 动画 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-chart-line"></i> 学习进度仪表板</h1>
-            <a href="index.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i> 返回主门户
-            </a>
-        </div>
+        <!-- 头部导航 -->
+        <header class="dashboard-header fade-in">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="header-title">
+                    <h1>学习进度仪表板</h1>
+                    <p>ComfyUI三个月精通计划 · 实时进度追踪</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> 主门户
+                </a>
+                <a href="weeks/week1/index.html" class="btn btn-primary">
+                    <i class="fas fa-play"></i> 继续学习
+                </a>
+                <button class="btn btn-outline" id="exportBtn">
+                    <i class="fas fa-download"></i> 导出报告
+                </button>
+            </div>
+        </header>
         
-        <div class="dashboard">
+        <!-- 仪表板网格 -->
+        <div class="dashboard-grid">
             <!-- 总体进度 -->
-            <div class="dashboard-card full-width">
-                <h2><i class="fas fa-tasks"></i> 总体进度概览</h2>
-                <div class="progress-section">
-                    <div class="progress-circle">
-                        <svg width="200" height="200">
-                            <circle cx="100" cy="100" r="90" fill="none" stroke="#e0e0e0" stroke-width="20"/>
-                            <circle cx="100" cy="100" r="90" fill="none" stroke="#4CAF50" stroke-width="20"
-                                    stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="565.48" id="mainProgress"/>
+            <div class="dashboard-card card-full">
+                <h2 class="card-title">
+                    <i class="fas fa-tachometer-alt"></i> 总体进度概览
+                </h2>
+                
+                <div class="overall-progress">
+                    <div class="progress-ring">
+                        <svg>
+                            <defs>
+                                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#4361ee" />
+                                    <stop offset="100%" stop-color="#7209b7" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="progress-ring-bg" cx="100" cy="100" r="90"></circle>
+                            <circle class="progress-ring-fill" cx="100" cy="100" r="90"></circle>
                         </svg>
-                        <div class="progress-text">
-                            <span id="progressPercent">0%</span>
-                            <small>已完成</small>
+                        <div class="progress-content">
+                            <div class="progress-percent" id="overallProgress">0%</div>
+                            <div class="progress-label">完成百分比</div>
                         </div>
                     </div>
                     
                     <div class="progress-stats">
                         <div class="stat-item">
-                            <div class="stat-value" id="completedLessons">0</div>
-                            <div class="stat-label">已完成课程</div>
+                            <div class="stat-value" id="totalLessons">0/36</div>
+                            <div class="stat-label">课程完成情况</div>
+                            <div class="stat-trend trend-up" id="lessonsTrend">+0 本周</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value" id="totalLessons">36</div>
-                            <div class="stat-label">总课程数</div>
+                            <div class="stat-value" id="studyHours">0h</div>
+                            <div class="stat-label">累计学习时间</div>
+                            <div class="stat-trend trend-up" id="timeTrend">+0h 本周</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value" id="daysRemaining">84</div>
-                            <div class="stat-label">剩余天数</div>
+                            <div class="stat-value" id="generatedImages">0</div>
+                            <div class="stat-label">生成图片总数</div>
+                            <div class="stat-trend trend-up" id="imagesTrend">+0 本周</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value" id="avgProgress">0%</div>
-                            <div class="stat-label">日均进度</div>
+                            <div class="stat-value" id="remainingDays">84</div>
+                            <div class="stat-label">剩余学习天数</div>
+                            <div class="stat-trend trend-down" id="daysTrend">-0 本周</div>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- 每周进度图表 -->
-            <div class="dashboard-card">
-                <h2><i class="fas fa-chart-bar"></i> 每周进度</h2>
+            <div class="dashboard-card card-half">
+                <h2 class="card-title">
+                    <i class="fas fa-calendar-week"></i> 每周进度
+                </h2>
                 <div class="chart-container">
                     <canvas id="weeklyChart"></canvas>
+                </div>
+                
+                <div class="week-stats" id="weekStats">
+                    <!-- 动态生成每周统计 -->
                 </div>
             </div>
             
             <!-- 学习时间分布 -->
-            <div class="dashboard-card">
-                <h2><i class="fas fa-clock"></i> 学习时间分布</h2>
-                <div class="chart-container">
-                    <canvas id="timeChart"></canvas>
-                </div>
-            </div>
-            
-            <!-- 最近完成的任务 -->
-            <div class="dashboard-card">
-                <h2><i class="fas fa-check-circle"></i> 最近完成</h2>
-                <div class="recent-list" id="recentCompleted">
-                    <div class="empty-state">
-                        <i class="fas fa-clipboard-list"></i>
-                        <p>暂无完成记录</p>
-                        <a href="weeks/week1/index.html" class="btn">开始第一课</a>
+            <div class="dashboard-card card-half">
+                <h2 class="card-title">
+                    <i class="fas fa-clock"></i> 学习时间分布
+                </h2>
+                <div class="time-distribution">
+                    <div class="time-chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                    
+                    <div class="time-legend" id="timeLegend">
+                        <!-- 动态生成时间图例 -->
                     </div>
                 </div>
             </div>
             
             <!-- 技能掌握情况 -->
-            <div class="dashboard-card full-width">
-                <h2><i class="fas fa-star"></i> 技能掌握情况</h2>
-                <div class="skills-grid" id="skillsGrid">
-                    <!-- 技能项将通过JS动态生成 -->
+            <div class="dashboard-card card-full">
+                <h2 class="card-title">
+                    <i class="fas fa-star"></i> 技能掌握情况
+                </h2>
+                <div class="skills-container" id="skillsContainer">
+                    <!-- 动态生成技能卡片 -->
                 </div>
             </div>
             
-            <!-- 性能数据 -->
-            <div class="dashboard-card full-width">
-                <h2><i class="fas fa-tachometer-alt"></i> A3000性能数据</h2>
+            <!-- 最近完成 -->
+            <div class="dashboard-card card-half">
+                <h2 class="card-title">
+                    <i class="fas fa-check-circle"></i> 最近完成
+                </h2>
+                <div class="recent-list" id="recentList">
+                    <!-- 动态生成最近完成列表 -->
+                </div>
+            </div>
+            
+            <!-- A3000性能数据 -->
+            <div class="dashboard-card card-half">
+                <h2 class="card-title">
+                    <i class="fas fa-microchip"></i> A3000性能数据
+                </h2>
                 <div class="performance-grid">
                     <div class="perf-item">
-                        <div class="perf-label">显存使用峰值</div>
-                        <div class="perf-value" id="peakVram">-- GB</div>
-                        <div class="perf-bar">
-                            <div class="perf-fill" id="vramBar"></div>
+                        <div class="perf-icon">
+                            <i class="fas fa-memory"></i>
                         </div>
+                        <div class="perf-value" id="avgVRAM">-- GB</div>
+                        <div class="perf-label">平均显存使用</div>
+                        <div class="perf-trend trend-up" id="vramTrend">稳定</div>
                     </div>
                     <div class="perf-item">
+                        <div class="perf-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="perf-value" id="avgRenderTime">-- s</div>
                         <div class="perf-label">平均渲染时间</div>
-                        <div class="perf-value" id="avgRenderTime">-- 秒</div>
-                        <div class="perf-bar">
-                            <div class="perf-fill" id="renderBar"></div>
-                        </div>
+                        <div class="perf-trend trend-down" id="renderTrend">优化中</div>
                     </div>
                     <div class="perf-item">
-                        <div class="perf-label">GPU最高温度</div>
-                        <div class="perf-value" id="maxTemp">-- °C</div>
-                        <div class="perf-bar">
-                            <div class="perf-fill" id="tempBar"></div>
+                        <div class="perf-icon">
+                            <i class="fas fa-thermometer-half"></i>
                         </div>
+                        <div class="perf-value" id="avgTemp">-- °C</div>
+                        <div class="perf-label">平均GPU温度</div>
+                        <div class="perf-trend trend-up" id="tempTrend">良好</div>
                     </div>
                     <div class="perf-item">
-                        <div class="perf-label">总生成图片</div>
-                        <div class="perf-value" id="totalImages">0 张</div>
-                        <div class="perf-bar">
-                            <div class="perf-fill" id="imagesBar"></div>
+                        <div class="perf-icon">
+                            <i class="fas fa-chart-line"></i>
                         </div>
+                        <div class="perf-value" id="efficiency">-- </div>
+                        <div class="perf-label">渲染效率</div>
+                        <div class="perf-trend trend-up" id="effTrend">提升中</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 学习里程碑 -->
+            <div class="dashboard-card card-full">
+                <h2 class="card-title">
+                    <i class="fas fa-flag-checkered"></i> 学习里程碑
+                </h2>
+                <div class="milestone-track">
+                    <div class="milestone-line"></div>
+                    <div class="milestones" id="milestones">
+                        <!-- 动态生成里程碑 -->
                     </div>
                 </div>
             </div>
             
             <!-- 学习建议 -->
-            <div class="dashboard-card full-width">
-                <h2><i class="fas fa-lightbulb"></i> 学习建议</h2>
-                <div class="suggestions" id="suggestions">
-                    <!-- 建议内容将通过JS动态生成 -->
+            <div class="dashboard-card card-full">
+                <h2 class="card-title">
+                    <i class="fas fa-lightbulb"></i> 个性化学习建议
+                </h2>
+                <div class="suggestions-grid" id="suggestionsGrid">
+                    <!-- 动态生成学习建议 -->
                 </div>
             </div>
         </div>
         
-        <div class="actions">
-            <button class="btn primary" onclick="exportReport()">
-                <i class="fas fa-file-export"></i> 导出进度报告
-            </button>
-            <button class="btn" onclick="printDashboard()">
-                <i class="fas fa-print"></i> 打印仪表板
-            </button>
-            <button class="btn" onclick="shareProgress()">
-                <i class="fas fa-share-alt"></i> 分享进度
-            </button>
-        </div>
+        <!-- 页脚 -->
+        <footer class="dashboard-footer">
+            <p>ComfyUI三个月精通计划 · 学习进度追踪系统 · 最后更新: <span id="lastUpdate">-</span></p>
+            <p style="margin-top: 10px; font-size: 0.85rem;">
+                <i class="fas fa-microchip"></i> NVIDIA A3000 12GB专版 · 
+                <i class="fas fa-sync-alt"></i> 数据每5分钟自动同步
+            </p>
+        </footer>
     </div>
 
-    <script src="scripts/progress-tracker.js"></script>
     <script>
+        // 初始化数据
+        let dashboardData = {
+            overallProgress: 0,
+            weeklyData: {},
+            skills: [],
+            recentActivities: [],
+            performance: {},
+            milestones: [],
+            suggestions: []
+        };
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置最后更新时间
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // 加载数据
+            loadDashboardData();
+            
+            // 初始化图表
+            initCharts();
+            
+            // 初始化事件监听器
+            initEventListeners();
+            
+            // 开始自动更新
+            startAutoUpdate();
+        });
+
+        // 加载仪表板数据
+        function loadDashboardData() {
+            // 从localStorage加载数据
+            const savedData = localStorage.getItem('comfyuiDashboardData');
+            const savedProgress = localStorage.getItem('comfyuiLearningProgress');
+            
+            // 如果有保存的数据，使用它
+            if (savedData) {
+                try {
+                    dashboardData = JSON.parse(savedData);
+                } catch (e) {
+                    console.log('加载保存的数据失败，使用默认数据');
+                    loadDefaultData();
+                }
+            } else if (savedProgress) {
+                // 如果有进度数据，基于它生成仪表板数据
+                generateDashboardFromProgress(savedProgress);
+            } else {
+                // 否则加载默认数据
+                loadDefaultData();
+            }
+            
+            // 更新UI
+            updateDashboardUI();
+        }
+
+        // 加载默认数据（演示用）
+        function loadDefaultData() {
+            dashboardData = {
+                overallProgress: 25,
+                weeklyData: {
+                    week1: { progress: 25, hours: 8, exercises: 12 },
+                    week2: { progress: 0, hours: 0, exercises: 0 },
+                    week3: { progress: 0, hours: 0, exercises: 0 },
+                    week4: { progress: 0, hours: 0, exercises: 0 },
+                    week5: { progress: 0, hours: 0, exercises: 0 },
+                    week6: { progress: 0, hours: 0, exercises: 0 },
+                    week7: { progress: 0, hours: 0, exercises: 0 },
+                    week8: { progress: 0, hours: 0, exercises: 0 },
+                    week9: { progress: 0, hours: 0, exercises: 0 },
+                    week10: { progress: 0, hours: 0, exercises: 0 },
+                    week11: { progress: 0, hours: 0, exercises: 0 },
+                    week12: { progress: 0, hours: 0, exercises: 0 }
+                },
+                skills: [
+                    { name: '环境安装', level: 80, tags: ['基础', '配置'] },
+                    { name: '工作流基础', level: 60, tags: ['节点', '连接'] },
+                    { name: '提示词工程', level: 30, tags: ['语法', '权重'] },
+                    { name: 'ControlNet', level: 20, tags: ['可控性', '结构'] },
+                    { name: '动画制作', level: 10, tags: ['AnimateDiff', '运动'] },
+                    { name: '一致性控制', level: 5, tags: ['IPAdapter', '角色'] },
+                    { name: '音频同步', level: 0, tags: ['TTS', '口型'] },
+                    { name: '商用制作', level: 0, tags: ['项目', '工作流'] }
+                ],
+                recentActivities: [
+                    { 
+                        title: '完成第一课：安装与Hello World',
+                        description: '成功安装ComfyUI并运行第一个工作流',
+                        time: '2小时前',
+                        icon: 'fas fa-rocket'
+                    },
+                    { 
+                        title: 'A3000性能基准测试',
+                        description: '完成4项性能测试，记录显卡表现',
+                        time: '3小时前',
+                        icon: 'fas fa-tachometer-alt'
+                    },
+                    { 
+                        title: 'GitHub仓库初始化',
+                        description: '建立学习项目管理仓库',
+                        time: '5小时前',
+                        icon: 'fas fa-code-branch'
+                    }
+                ],
+                performance: {
+                    avgVRAM: '7.2',
+                    avgRenderTime: '12.5',
+                    avgTemp: '68',
+                    efficiency: 'B+',
+                    vramTrend: '稳定',
+                    renderTrend: '良好',
+                    tempTrend: '优秀',
+                    effTrend: '提升中'
+                },
+                milestones: [
+                    { id: 1, name: '环境专家', week: 1, completed: true },
+                    { id: 2, name: '静态大师', week: 4, completed: false },
+                    { id: 3, name: '动态能手', week: 8, completed: false },
+                    { id: 4, name: '商业创作者', week: 12, completed: false }
+                ],
+                suggestions: [
+                    {
+                        title: '加强提示词练习',
+                        description: '根据你的进度，建议每天花30分钟练习提示词构造，尝试不同风格的组合。',
+                        icon: 'fas fa-font'
+                    },
+                    {
+                        title: '探索ControlNet',
+                        description: '开始学习canny和depth预处理器，这对后续的视频制作非常重要。',
+                        icon: 'fas fa-project-diagram'
+                    },
+                    {
+                        title: '建立作品集',
+                        description: '开始整理你的优秀作品，建立一个GitHub Pages作品集网站。',
+                        icon: 'fas fa-images'
+                    }
+                ]
+            };
+            
+            // 保存到localStorage
+            saveDashboardData();
+        }
+
+        // 从学习进度数据生成仪表板数据
+        function generateDashboardFromProgress(progressData) {
+            // 这里可以根据实际进度数据生成仪表板数据
+            console.log('基于进度数据生成仪表板数据');
+        }
+
         // 初始化图表
         function initCharts() {
             // 每周进度图表
@@ -162,23 +1185,61 @@
                     datasets: [{
                         label: '完成百分比',
                         data: [25, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(76, 175, 80, 0.7)',
-                        borderColor: 'rgba(76, 175, 80, 1)',
-                        borderWidth: 1
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.8)',
+                            'rgba(67, 97, 238, 0.6)',
+                            'rgba(67, 97, 238, 0.6)',
+                            'rgba(67, 97, 238, 0.6)',
+                            'rgba(67, 97, 238, 0.6)',
+                            'rgba(67, 97, 238, 0.6)'
+                        ],
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `完成度: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
                         }
                     }
                 }
             });
-            
-            // 学习时间图表
+
+            // 学习时间分布图表
             const timeCtx = document.getElementById('timeChart').getContext('2d');
             const timeChart = new Chart(timeCtx, {
                 type: 'doughnut',
@@ -187,166 +1248,304 @@
                     datasets: [{
                         data: [60, 20, 10, 10],
                         backgroundColor: [
-                            '#4CAF50',
-                            '#2196F3',
-                            '#FF9800',
-                            '#9C27B0'
-                        ]
+                            'rgba(67, 97, 238, 0.8)',
+                            'rgba(114, 9, 183, 0.8)',
+                            'rgba(76, 201, 240, 0.8)',
+                            'rgba(247, 37, 133, 0.8)'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 15
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}%`;
+                                }
+                            }
                         }
                     }
                 }
             });
+
+            // 保存图表实例以便更新
+            window.weeklyChart = weeklyChart;
+            window.timeChart = timeChart;
         }
-        
-        // 更新进度数据
-        function updateProgressData() {
-            const completed = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-            const totalLessons = 36;
-            const progress = Math.round((completed.length / totalLessons) * 100);
+
+        // 更新图表数据
+        function updateCharts() {
+            if (window.weeklyChart) {
+                // 更新每周进度图表
+                const weeklyData = Object.values(dashboardData.weeklyData).slice(0, 6).map(w => w.progress);
+                window.weeklyChart.data.datasets[0].data = weeklyData;
+                window.weeklyChart.update();
+            }
             
+            if (window.timeChart) {
+                // 更新学习时间分布图表
+                // 这里可以根据实际数据更新
+                window.timeChart.update();
+            }
+        }
+
+        // 更新仪表板UI
+        function updateDashboardUI() {
             // 更新总体进度
-            document.getElementById('progressPercent').textContent = progress + '%';
-            document.getElementById('completedLessons').textContent = completed.length;
+            document.getElementById('overallProgress').textContent = dashboardData.overallProgress + '%';
             
             // 更新进度环
-            const circle = document.getElementById('mainProgress');
-            const circumference = 565.48;
-            const offset = circumference - (progress / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
+            const progressCircle = document.querySelector('.progress-ring-fill');
+            const circumference = 565; // 2 * π * r (90 * 2 * 3.14)
+            const offset = circumference - (dashboardData.overallProgress / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+            
+            // 更新统计数字
+            const completedLessons = Math.floor(dashboardData.overallProgress / 100 * 36);
+            document.getElementById('totalLessons').textContent = `${completedLessons}/36`;
+            document.getElementById('studyHours').textContent = calculateTotalHours() + 'h';
+            
+            // 更新技能掌握情况
+            updateSkillsUI();
             
             // 更新最近完成列表
-            updateRecentCompleted(completed);
+            updateRecentActivities();
             
-            // 更新技能网格
-            updateSkillsGrid();
+            // 更新A3000性能数据
+            updatePerformanceUI();
             
-            // 更新性能数据
-            updatePerformanceData();
+            // 更新里程碑
+            updateMilestones();
             
             // 更新学习建议
-            updateSuggestions(progress);
-        }
-        
-        // 更新最近完成列表
-        function updateRecentCompleted(completed) {
-            const container = document.getElementById('recentCompleted');
+            updateSuggestions();
             
-            if (completed.length === 0) {
+            // 更新每周统计
+            updateWeekStats();
+            
+            // 更新图表
+            updateCharts();
+        }
+
+        // 计算总学习小时数
+        function calculateTotalHours() {
+            let totalHours = 0;
+            Object.values(dashboardData.weeklyData).forEach(week => {
+                totalHours += week.hours || 0;
+            });
+            return totalHours;
+        }
+
+        // 更新技能UI
+        function updateSkillsUI() {
+            const container = document.getElementById('skillsContainer');
+            if (!container) return;
+            
+            container.innerHTML = dashboardData.skills.map(skill => `
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <div class="skill-name">${skill.name}</div>
+                        <div class="skill-level">${skill.level}%</div>
+                    </div>
+                    <div class="skill-progress">
+                        <div class="skill-progress-fill" style="width: ${skill.level}%"></div>
+                    </div>
+                    <div class="skill-tags">
+                        ${skill.tags.map(tag => `<span class="skill-tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新最近完成列表
+        function updateRecentActivities() {
+            const container = document.getElementById('recentList');
+            if (!container) return;
+            
+            if (dashboardData.recentActivities.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-clipboard-list"></i>
-                        <p>暂无完成记录</p>
-                        <a href="weeks/week1/index.html" class="btn">开始第一课</a>
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="empty-title">暂无完成记录</div>
+                        <div class="empty-desc">开始学习后，你的完成记录会显示在这里</div>
+                        <a href="weeks/week1/index.html" class="btn btn-primary">
+                            <i class="fas fa-play"></i> 开始第一课
+                        </a>
                     </div>
                 `;
                 return;
             }
             
-            const recent = completed.slice(-5).reverse();
-            container.innerHTML = recent.map(item => `
+            container.innerHTML = dashboardData.recentActivities.map(activity => `
                 <div class="recent-item">
                     <div class="recent-icon">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="${activity.icon}"></i>
                     </div>
                     <div class="recent-content">
-                        <div class="recent-title">${item.title || '未命名课程'}</div>
-                        <div class="recent-date">${new Date(item.date).toLocaleDateString()}</div>
+                        <div class="recent-title">${activity.title}</div>
+                        <div class="recent-desc">${activity.description}</div>
                     </div>
-                    <div class="recent-time">${item.time || '--'}分钟</div>
+                    <div class="recent-time">${activity.time}</div>
                 </div>
             `).join('');
         }
-        
-        // 更新技能网格
-        function updateSkillsGrid() {
-            const skills = [
-                { id: 'setup', name: '环境安装', level: 1, max: 3 },
-                { id: 'workflow', name: '工作流基础', level: 1, max: 5 },
-                { id: 'prompt', name: '提示词工程', level: 0, max: 5 },
-                { id: 'controlnet', name: 'ControlNet', level: 0, max: 5 },
-                { id: 'animation', name: '动画制作', level: 0, max: 5 },
-                { id: 'consistency', name: '一致性控制', level: 0, max: 5 },
-                { id: 'audio', name: '音频同步', level: 0, max: 3 },
-                { id: 'commercial', name: '商用制作', level: 0, max: 5 }
-            ];
+
+        // 更新性能UI
+        function updatePerformanceUI() {
+            const perf = dashboardData.performance;
             
-            const grid = document.getElementById('skillsGrid');
-            grid.innerHTML = skills.map(skill => `
-                <div class="skill-item">
-                    <div class="skill-name">${skill.name}</div>
-                    <div class="skill-level">
-                        ${'★'.repeat(skill.level)}${'☆'.repeat(skill.max - skill.level)}
+            document.getElementById('avgVRAM').textContent = perf.avgVRAM + ' GB';
+            document.getElementById('avgRenderTime').textContent = perf.avgRenderTime + ' s';
+            document.getElementById('avgTemp').textContent = perf.avgTemp + ' °C';
+            document.getElementById('efficiency').textContent = perf.efficiency;
+            
+            document.getElementById('vramTrend').textContent = perf.vramTrend;
+            document.getElementById('renderTrend').textContent = perf.renderTrend;
+            document.getElementById('tempTrend').textContent = perf.tempTrend;
+            document.getElementById('effTrend').textContent = perf.effTrend;
+        }
+
+        // 更新里程碑
+        function updateMilestones() {
+            const container = document.getElementById('milestones');
+            if (!container) return;
+            
+            container.innerHTML = dashboardData.milestones.map(milestone => `
+                <div class="milestone ${milestone.completed ? 'completed' : ''} ${milestone.week === 1 ? 'active' : ''}">
+                    <div class="milestone-dot">
+                        ${milestone.completed ? '<i class="fas fa-check"></i>' : milestone.week}
                     </div>
-                    <div class="skill-progress">
-                        <div class="skill-bar" style="width: ${(skill.level / skill.max) * 100}%"></div>
-                    </div>
+                    <div class="milestone-label">${milestone.name}</div>
                 </div>
             `).join('');
         }
-        
-        // 更新性能数据
-        function updatePerformanceData() {
-            const perf = JSON.parse(localStorage.getItem('a3000Performance') || '{}');
-            
-            document.getElementById('peakVram').textContent = (perf.peakVram || 0).toFixed(1) + ' GB';
-            document.getElementById('avgRenderTime').textContent = (perf.avgRenderTime || 0).toFixed(1) + ' 秒';
-            document.getElementById('maxTemp').textContent = (perf.maxTemp || 0) + ' °C';
-            document.getElementById('totalImages').textContent = (perf.totalImages || 0) + ' 张';
-            
-            // 更新进度条
-            document.getElementById('vramBar').style.width = Math.min((perf.peakVram || 0) / 12 * 100, 100) + '%';
-            document.getElementById('renderBar').style.width = Math.max(100 - ((perf.avgRenderTime || 0) / 30 * 100), 0) + '%';
-            document.getElementById('tempBar').style.width = Math.max(100 - ((perf.maxTemp || 0) / 85 * 100), 0) + '%';
-            document.getElementById('imagesBar').style.width = Math.min((perf.totalImages || 0) / 100 * 100, 100) + '%';
-        }
-        
+
         // 更新学习建议
-        function updateSuggestions(progress) {
-            const suggestions = document.getElementById('suggestions');
-            let html = '';
+        function updateSuggestions() {
+            const container = document.getElementById('suggestionsGrid');
+            if (!container) return;
             
-            if (progress < 10) {
-                html = `
-                    <div class="suggestion-item">
-                        <i class="fas fa-rocket"></i>
-                        <div>
-                            <h3>刚刚开始！</h3>
-                            <p>建议每天至少学习1小时，保持连续性。从基础工作流开始，不要急于求成。</p>
+            if (dashboardData.suggestions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">
+                            <i class="fas fa-lightbulb"></i>
                         </div>
+                        <div class="empty-title">暂无学习建议</div>
+                        <div class="empty-desc">完成更多学习任务后，系统会为你生成个性化建议</div>
                     </div>
                 `;
-            } else if (progress < 30) {
-                html = `
-                    <div class="suggestion-item">
-                        <i class="fas fa-fire"></i>
-                        <div>
-                            <h3>保持势头！</h3>
-                            <p>基础已经掌握，开始尝试不同的模型和提示词组合。建议制作一个个人作品集。</p>
-                        </div>
-                    </div>
-                `;
+                return;
             }
             
-            suggestions.innerHTML = html;
+            container.innerHTML = dashboardData.suggestions.map(suggestion => `
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <i class="${suggestion.icon}"></i>
+                    </div>
+                    <div class="suggestion-title">${suggestion.title}</div>
+                    <div class="suggestion-desc">${suggestion.description}</div>
+                    <button class="btn btn-outline" style="margin-top: 10px;">
+                        查看详情
+                    </button>
+                </div>
+            `).join('');
         }
-        
-        // 导出报告
-        function exportReport() {
-            const data = {
-                progress: localStorage.getItem('completedLessons'),
-                performance: localStorage.getItem('a3000Performance'),
-                exportDate: new Date().toISOString(),
-                reportType: 'comfyui-learning-progress'
+
+        // 更新每周统计
+        function updateWeekStats() {
+            const container = document.getElementById('weekStats');
+            if (!container) return;
+            
+            // 只显示前6周
+            const weeks = Object.entries(dashboardData.weeklyData).slice(0, 6);
+            
+            container.innerHTML = weeks.map(([weekKey, weekData], index) => `
+                <div class="week-stat">
+                    <div class="week-number">第${index + 1}周</div>
+                    <div class="week-progress-bar">
+                        <div class="week-progress-fill" style="width: ${weekData.progress}%"></div>
+                    </div>
+                    <div style="color: var(--gray); font-size: 0.9rem;">
+                        ${weekData.progress}% · ${weekData.hours}h
+                    </div>
+                </div>
+            `).join('');
+            
+            // 更新时间分布图例
+            updateTimeLegend();
+        }
+
+        // 更新时间分布图例
+        function updateTimeLegend() {
+            const container = document.getElementById('timeLegend');
+            if (!container) return;
+            
+            const timeData = [
+                { label: '基础练习', value: '60%', color: 'rgba(67, 97, 238, 0.8)' },
+                { label: '项目实践', value: '20%', color: 'rgba(114, 9, 183, 0.8)' },
+                { label: '理论学习', value: '10%', color: 'rgba(76, 201, 240, 0.8)' },
+                { label: '问题解决', value: '10%', color: 'rgba(247, 37, 133, 0.8)' }
+            ];
+            
+            container.innerHTML = timeData.map(item => `
+                <div class="legend-item">
+                    <div style="display: flex; align-items: center;">
+                        <div class="legend-color" style="background: ${item.color};"></div>
+                        <div class="legend-label">${item.label}</div>
+                    </div>
+                    <div class="legend-value">${item.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 导出报告按钮
+            document.getElementById('exportBtn').addEventListener('click', exportDashboardReport);
+            
+            // 模拟进度更新（演示用）
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'u') {
+                    simulateProgressUpdate();
+                }
+            });
+            
+            // 添加点击动画
+            document.querySelectorAll('.dashboard-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.classList.add('pulse');
+                    setTimeout(() => this.classList.remove('pulse'), 2000);
+                });
+            });
+        }
+
+        // 导出仪表板报告
+        function exportDashboardReport() {
+            const report = {
+                title: "ComfyUI学习进度报告",
+                generatedAt: new Date().toISOString(),
+                overallProgress: dashboardData.overallProgress + '%',
+                totalStudyHours: calculateTotalHours(),
+                skills: dashboardData.skills,
+                recentActivities: dashboardData.recentActivities,
+                performance: dashboardData.performance,
+                milestones: dashboardData.milestones,
+                suggestions: dashboardData.suggestions
             };
             
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            // 创建下载
+            const blob = new Blob([JSON.stringify(report, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -355,36 +1554,104 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        }
-        
-        // 打印仪表板
-        function printDashboard() {
-            window.print();
-        }
-        
-        // 分享进度
-        function shareProgress() {
-            const progress = Math.round((JSON.parse(localStorage.getItem('completedLessons') || '[]').length / 36) * 100);
-            const text = `我在ComfyUI三个月精通计划中已经完成了${progress}%的进度！`;
             
-            if (navigator.share) {
-                navigator.share({
-                    title: 'ComfyUI学习进度',
-                    text: text,
-                    url: window.location.href
-                });
-            } else {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('进度已复制到剪贴板！');
-                });
-            }
+            // 显示成功消息
+            showNotification('报告已导出为JSON文件！', 'success');
         }
-        
-        // 页面加载
-        document.addEventListener('DOMContentLoaded', function() {
-            initCharts();
-            updateProgressData();
-        });
+
+        // 模拟进度更新（演示用）
+        function simulateProgressUpdate() {
+            // 增加总体进度
+            dashboardData.overallProgress = Math.min(dashboardData.overallProgress + 5, 100);
+            
+            // 更新第一周进度
+            dashboardData.weeklyData.week1.progress = Math.min(dashboardData.weeklyData.week1.progress + 10, 100);
+            dashboardData.weeklyData.week1.hours += 2;
+            
+            // 更新技能
+            dashboardData.skills[0].level = Math.min(dashboardData.skills[0].level + 5, 100);
+            dashboardData.skills[1].level = Math.min(dashboardData.skills[1].level + 3, 100);
+            
+            // 添加新的完成记录
+            dashboardData.recentActivities.unshift({
+                title: '模拟完成：提示词练习',
+                description: '完成一组提示词构造练习',
+                time: '刚刚',
+                icon: 'fas fa-font'
+            });
+            
+            // 限制最近记录数量
+            if (dashboardData.recentActivities.length > 5) {
+                dashboardData.recentActivities.pop();
+            }
+            
+            // 保存数据
+            saveDashboardData();
+            
+            // 更新UI
+            updateDashboardUI();
+            
+            // 显示通知
+            showNotification('进度已更新！', 'info');
+        }
+
+        // 保存仪表板数据
+        function saveDashboardData() {
+            localStorage.setItem('comfyuiDashboardData', JSON.stringify(dashboardData));
+        }
+
+        // 开始自动更新
+        function startAutoUpdate() {
+            // 每30秒检查一次更新
+            setInterval(() => {
+                // 这里可以添加从服务器或localStorage获取最新数据的逻辑
+                updateLastUpdateTime();
+            }, 30000);
+        }
+
+        // 更新最后更新时间
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 显示通知
+        function showNotification(message, type) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'success' ? 'rgba(76, 201, 240, 0.9)' : 'rgba(247, 37, 133, 0.9)'};
+                color: white;
+                border-radius: 10px;
+                font-weight: 600;
+                z-index: 1000;
+                transform: translateX(120%);
+                transition: transform 0.3s ease;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 显示通知
+            setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+            
+            // 3秒后隐藏并移除
+            setTimeout(() => {
+                notification.style.transform = 'translateX(120%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
