@@ -47,3 +47,5 @@
 4. 大分辨率使用 Tiled VAE
 
 ## 📂 项目结构
+
+![GitHub Pages](https://github.com/你的用户名/ComfyUI-Mastery-3Months/actions/workflows/pages/pages-build-deployment/badge.svg)
