@@ -3,6 +3,8 @@ KIHJAI把z-image做了精简
 项目地址：https://civitai.com/models/2170391/z-image-turbo-fp8-kijai
 下载地址：https://civitai.com/api/download/models/2444102?type=Model&format=SafeTensor&size=pruned&fp=fp8
 
+z-image的Lora
+项目名称：Midjourney Luneva Cinematic Lora
 项目地址：https://civitai.com/models/2185167?modelVersionId=2460437
 下载地址：https://civitai.com/api/download/models/2460437?type=Model&format=SafeTensor
 
