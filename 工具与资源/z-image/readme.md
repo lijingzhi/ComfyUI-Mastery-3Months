@@ -24,7 +24,7 @@ Z-Image Turbo 是一款快速、精简、强大且高效的图像生成模型，
 
 * 优先推荐：`4x_NMKD-Siax_200k.pth` 或 `4x_UltraSharp.pth`（效果最佳）
 
-* 其他可选：您可以选择各种优质模型集合[https://huggingface.co/uwg/upscaler/tree/main/ESRGAN]（放置在 \models\upscale_models\ 文件夹中）
+* 其他可选：您可以选择各种优质模型集合[https://huggingface.co/uwg/upscaler/tree/main/ESRGAN] (放置在 \models\upscale_models\ 文件夹中)
 
 ### 额外说明
 
